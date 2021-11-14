@@ -282,13 +282,21 @@ class ProjectBox extends React.Component {
     }
 
     getmaxid(){
-        if(this.state.max===false) {
+      /*  if(this.state.max===false) {
             const uri = '/api/todoitems';
             fetch(uri)
                 .then(response => response.json())
                 .then(data => this.maxid(data))
                 .catch(error => console.error('Unable to get items.', error));
         }
+
+
+       */
+        setTimeout(() => {  const uri = '/api/todoitems';
+            fetch(uri)
+                .then(response => response.json())
+                .then(data => this.maxid(data))
+                .catch(error => console.error('Unable to get items.', error)); }, 5000);
     }
     maxid(data){
         var dx=0;
@@ -586,11 +594,29 @@ class Main extends React.Component {
     constructor(props) {
         super(props);
         this.state={
-            numberOfprojects:3,
+            numberOfprojects:0,
             projectArray:Array(3).fill(''),
             maxprojectsnumber:10,
-            init:false
+            init:false,
+            maxid:0
         }
+    }
+
+    fetchcolumn(i){
+        const item={
+            ID:i,
+            TodoItems:null,
+        }
+        fetch('api/columns', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(item)
+        })
+            .then(response => response.json())
+            .catch(error => console.error('Unable to add item.', error))
     }
 
     addProject(dx){
@@ -604,21 +630,38 @@ class Main extends React.Component {
             </Grid>
 
             )
+        this.fetchcolumn(dx+1)
+        this.setState({
+            projectArray:projects,
+            numberOfprojects:this.state.numberOfprojects+1
+        })
+    }
+    addProjectwithoutfetch(dx){
+        let projects= []
+        for(let j=0;j<this.state.numberOfprojects;j++){
+            projects.push(this.state.projectArray[j])
+        }
+        projects.push(
+            <Grid item xs={12} md={3}>
+                <ProjectBox value={(dx+1)} />
+            </Grid>
+
+        )
         this.setState({
             projectArray:projects,
             numberOfprojects:this.state.numberOfprojects+1
         })
     }
     clearProjects(){
+        this.deletealltodos()
         this.setState({
             projectArray:Array(0),
-            numberOfprojects:1
         })
     }
-    addlist(data){
 
+    addlist(data){
             for (var k = 0; k < data.length; k++) {
-                this.addProject(k);
+                this.addProjectwithoutfetch(k);
             }
     }
     initcolumns(){
@@ -631,6 +674,45 @@ class Main extends React.Component {
                     .catch(error => console.error('Unable to get items.', error));
         }
     }
+
+    maxid(data){
+        let dx=0;
+        for(let k=0;k<data.length;k++){
+            dx=data[k].id
+        }
+        this.setState({
+            maxid:dx,
+        })
+        for(let l=1;l<=dx;l++){
+            this.deletetodo(l)
+        }
+        for(let h=1;h<=this.state.numberOfprojects;h++){
+            this.deletecolumns(h)
+        }
+        this.setState({numberOfprojects:0})
+    }
+
+    deletecolumns(h){
+        fetch("/api/columns/"+h, {
+            method: 'DELETE'
+        })
+            .catch(error => console.error('Unable to delete item.', error));
+    }
+    deletetodo(id){
+        fetch("/api/todoitems/"+id, {
+            method: 'DELETE'
+        })
+            .catch(error => console.error('Unable to delete item.', error));
+    }
+    deletealltodos(){
+        const uri = '/api/todoitems';
+        fetch(uri)
+            .then(response => response.json())
+            .then(data => this.maxid(data))
+            .catch(error => console.error('Unable to get items.', error));
+    }
+
+
     render() {
         return (
             <div >
@@ -639,7 +721,7 @@ class Main extends React.Component {
                         {this.initcolumns()}
                         {this.state.projectArray}
                         <Grid item xs={12} md={3}>
-                            <Button variant="text" onClick={()=>this.addProject()}> Add Project</Button>
+                            <Button variant="text" onClick={()=>this.addProject(this.state.numberOfprojects)}> Add Project</Button>
                             <Button variant="text" onClick={()=>this.clearProjects()}> Clear Projects</Button>
                         </Grid>
                     </Grid>
