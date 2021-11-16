@@ -14,203 +14,105 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Stack from '@mui/material/Stack';
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
 import {Box, createTheme, Grid} from "@material-ui/core";
-import {Item} from "@mui-treasury/components/flex";
-/*
-class FormClass extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            value: '',
-        };
-        this.doSomethingWithInput = this.doSomethingWithInput.bind(this);
-        this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
 
-    handleTextFieldChange(event) {
-        event.preventDefault();
-        this.setState({
-            value: event.target.value,
-        });
-    }
-
-    doSomethingWithInput(event) {
-        event.preventDefault();
-        this.setState({
-            value:event.target.value
-        })
-    }
-
-    handleChange(event) {
-        this.setState({value: event.target.value});
-    }
-
-    handleSubmit(event){
-        this.setState({
-            value:this.state.value
-        })
-        event.preventDefault();
-    }
-    render() {
-        return(
-            <>
-                <form onSubmit={this.handleSubmit}>
-                    <label>
-                        Task:
-                        <input className="inputfields" type="text" value={this.state.value} onChange={this.handleChange} />
-                    </label>
-                    <input type="submit" className="inputbutton" value="Submit"/>
-                </form>
-            </>
-        );
-    }
-}
-
-class Myform extends React.Component{
+class Todo extends React.Component{
     constructor(props) {
         super(props);
         this.state={
-            value:''
-        }
-    }
-    render(){
-        return(
-            <div>
-                <form onSubmit={this.handleSubmit}>
-                <label>
-                    Task:
-                    <input className="inputfields" type="text" value={this.state.value} onChange={this.handleChange} />
-                </label>
-                <input type="submit" className="inputbutton" value="Submit"/>
-            </form>
-            </div>
-
-    )
-    }
-}
-
-
-export default function FormDialog(props) {
-    const [open, setOpen] = React.useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleSubmit = (value) => {
-        setOpen(false);
-    };
-    return (
-        <div>
-            <Button startIcon={<AddCircleIcon/>} onClick={handleClickOpen}/>
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Subscribe</DialogTitle>
-                <DialogContent>
-                    <FormClass/>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleClose}>Add</Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
-}
-
-
-class Task extends React.Component{
-    constructor(props) {
-        super(props)
-        this.state={
-            name:'TestName',
-            description:'sometext',
-            deadline:'2000-12-12',
-            selectedvalue:'',
+            id:this.props.id,
+            columnid:this.props.columnid,
+            name:this.props.name,
+            description:this.props.description,
             open:false,
-        }
-    }
+            namemodifyvalue:this.props.name,
+            descriptionmodifyvalue:this.props.description
 
-    AddTest(newname){
+        }
+
+    }
+    closeModify(){
+        let namemod=this.state.namemodifyvalue
+        let desmod=this.state.descriptionmodifyvalue
         this.setState({
-            name:newname
+            open:false,
+            name:namemod,
+            description:desmod
         })
-    }
-    render(){
-        return(
-            <Card sx={{maxWidth:300}}>
-                <CardContent>
-                    <Typography>
-                        Név:{this.props.value}
-                    </Typography>
-                </CardContent>
-                <CardActions>
-                    <Button startIcon={<ArrowUpwardIcon/>}/>
-                    <Button startIcon={<ArrowDownwardIcon/>} />
-                </CardActions>
-            </Card>
 
-
-        )
-    }
-}
-class TaskContainer extends React.Component{
-    constructor() {
-        super();
-        this.state={
-            tasks:[],
-            taskcnt:0,
+        const item={
+            id:this.state.id,
+            columnID:this.state.columnid,
+            name:this.state.namemodifyvalue,
+            description:this.state.descriptionmodifyvalue,
+        //    position:1,
+        //    column:null
         }
+        this.fetchmodify(item)
+
     }
 
-    addTask(name,description,date){
-        let tasks=this.state.tasks
-        tasks.push() //TODO
-        this.setstate({
-            tasks:tasks,
-        })
+    fetchmodify(item){
+        fetch('/api/todoitems/'+[this.state.id], {
+            method: 'PUT',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify(item)
+        }).catch(error => console.error('Unable to add item.', error))
     }
 
     render() {
-        return (
-            <label>
-                TESZT
-            </label>
-        );
-    }
-}
-
-
-
-class Dataline extends React.Component{
-    constructor(props) {
-        super(props);
-    }
-    render(i){
         return(
-            <button className="dataline">
-                {this.props.value}
-            </button>
+            <div className="margin">
+                <Card sx={{maxWidth:300}}>
+                    <CardContent>
+                        <Typography>
+                            Név:{this.state.name}
+                        </Typography>
+                        <Typography>
+                            Leírás:{this.state.description}
+                        </Typography>
+                    </CardContent>
+                    <CardActions>
+                        <Button startIcon={<ArrowUpwardIcon/>} onClick={()=>this.props.updataline(this.state.id)}/>
+                        <Button startIcon={<ArrowDownwardIcon/>} onClick={()=>this.props.downdataline(this.state.id)} />
+                        <Button startIcon={<DeleteIcon/>} onClick={()=>this.props.emptydataline(this.state.id)}/>
+                        <Button sx={{width:300}} startIcon={<AddCircleIcon/>} onClick={()=>this.setState({open:true})}/>
+                        <Dialog open={this.state.open} alignItems="center">
+                            <DialogTitle>Modify a Task</DialogTitle>
+                            <DialogContentText >To modify a Task please edit the fields below</DialogContentText>
+                            <DialogContent>
+                                <form onSubmit={()=>this.closeModify()}>
+                                    <label>
+                                        Task:
+                                        <TextField type="text" value={this.state.namemodifyvalue} onChange={(e)=>this.setState({namemodifyvalue: e.target.value})} />
+                                        Description:
+                                        <TextField type="text" value={this.state.descriptionmodifyvalue} onChange={(e)=>this.setState({descriptionmodifyvalue: e.target.value})} />
+                                    </label>
+                                    <div> <Button onClick={()=>this.setState({open:false})}>Cancel</Button>
+                                        <Button type="submit" variant="text" value="Submit">Modify</Button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </CardActions>
+                </Card>
+            </div>
         )
     }
 }
-*/
+
+
+
 class ProjectBox extends React.Component {
     constructor(props) {
         super(props);
         this.state={
+            todos:Array().fill(''),
             id:this.props.value,
             datalines:Array().fill(''),
             datas:Array().fill(''),
@@ -262,24 +164,26 @@ class ProjectBox extends React.Component {
     }
     adddatalines(data){
         var k=0
+        let todolist=[]
+        let cnt=this.state.count
         for(k=0;k<data.length;k++){
             if(data[k].columnID===this.state.id){
-                let newarray=this.state.datalines
-                let newarray2=this.state.datas
-                let newarray3=this.state.ids
-                let prevcount=this.state.count
-                newarray[this.state.count]=data[k].name
-                newarray2[this.state.count]=data[k].description
-                newarray3[this.state.count]=data[k].id
-                this.setState({
-                    count:prevcount+1,
-                    datalines:newarray,
-                    datas:newarray2,
-                    ids:newarray3
-                })
+                console.log(data[k].name)
+                todolist.push(<Todo name={data[k].name}
+                                    description={data[k].description}
+                                    id={data[k].id}
+                                    columnid={data[k].columnID}
+                                 downdataline={(i)=>this.downdataline(i)}
+                                 updataline={(i)=>this.updataline(i)}
+                                 emptydataline={(i)=>this.emptydataline(i)}
+
+                />)
+                cnt++
+                }
             }
+        this.setState({todos:todolist,count:cnt})
+
         }
-    }
 
     getmaxid(){
       /*  if(this.state.max===false) {
@@ -292,6 +196,14 @@ class ProjectBox extends React.Component {
 
 
        */
+        if(this.state.max===false){
+            const uri = '/api/todoitems';
+            fetch(uri)
+                .then(response => response.json())
+                .then(data => this.maxid(data))
+                .catch(error => console.error('Unable to get items.', error));
+        }
+
         setTimeout(() => {  const uri = '/api/todoitems';
             fetch(uri)
                 .then(response => response.json())
@@ -318,13 +230,22 @@ class ProjectBox extends React.Component {
         newarray[this.state.count]=this.state.value
         newarray2[this.state.count]=this.state.value2
         newarray3[this.state.count]=this.state.maxid+1
+        let todoslist=this.state.todos
+        todoslist.push(<Todo name={this.state.value}
+                            description={this.state.value2}
+                            id={this.state.maxid+1}
+                             columnid={this.state.id}
+                            downdataline={(i)=>this.downdataline(i)}
+                            updataline={(i)=>this.updataline(i)}
+                            emptydataline={(i)=>this.emptydataline(i)}
+        />)
         const item={
             id:this.state.maxid+1,
             columnID:this.state.id,
             name:this.state.value,
             description:this.state.value2,
-            position:1,
-            column:null
+          //  position:1,
+         //   column:null
         }
         fetch('api/todoitems', {
             method: 'POST',
@@ -344,7 +265,8 @@ class ProjectBox extends React.Component {
             value:'',
             value2:'',
             open:false,
-            max:false
+            max:false,
+            todos:todoslist
         })
 
 
@@ -375,8 +297,8 @@ class ProjectBox extends React.Component {
                     columnID:this.state.id,
                     name:this.state.valuemodify,
                     description:this.state.value2modify,
-                    position:1,
-                    column:null
+                 //   position:1,
+                //    column:null
             })
         }).catch(error => console.error('Unable to add item.', error))
         /*    .then(()=>this.setState({
@@ -390,113 +312,160 @@ class ProjectBox extends React.Component {
     }
 
     emptydataline(i){
-        let datalinesnew=this.state.datalines
-        let id=this.state.ids[i]
-        this.setState({
-            datalines:datalinesnew,
-        })
-        fetch("/api/todoitems/"+id, {
+
+        fetch("/api/todoitems/"+i, {
             method: 'DELETE'
         })
             .catch(error => console.error('Unable to delete item.', error));
-
-        this.reorderdatalines(i)
-        this.renderdatalines()
+        setTimeout(() => { this.setState({todos:Array().fill(''),init:false})},500)
     }
-    reorderdatalines(i){
-        let datalinesnew=this.state.datalines
-        let datasnew=this.state.datas
-        let idsnew=this.state.ids
-        let datacnt=this.state.count
-        if(i>=datacnt)
+    updataline(k){
+        let i=0
+        const uri = '/api/todoitems';
+        fetch(uri)
+            .then(response => response.json())
+            .then(data => this.toMoveUP(data,k))
+            .catch(error => console.error('Unable to get items.', error));
+    }
+    toMoveUP(data,k){
+        let dx
+        let datalist=[]
+        for(let d=0;d<data.length;d++){
+            if(data[d].columnID===this.state.id){
+                datalist.push(data[d])
+            }
+        }
+        for(let i=0;i<datalist.length;i++){
+            if(datalist[i].id===k){
+                dx=i
+            }
+        }
+        if(dx===0)
             return
-        for(let j=i;j<datacnt;j++) {
-            datalinesnew[j] = datalinesnew[j + 1]
-            datasnew[j] = datasnew[j + 1]
-            idsnew[j] = idsnew[j + 1]
+
+        const itemfelso={
+            id:datalist[dx].id,
+            columnID:this.state.id,
+            name:datalist[dx-1].name,
+            description:datalist[dx-1].description,
+         //   position:1,
+         //   column:null
         }
-        this.setState({
-            datalines: datalinesnew,
-            datas:datasnew,
-            ids:idsnew,
-            count:datacnt-1
-        })
+
+        const itemalso={
+            id:datalist[dx-1].id,
+            columnID:this.state.id,
+            name:datalist[dx].name,
+            description:datalist[dx].description,
+         //   position:1,
+         //   column:null
+        }
+        this.fetchback(itemfelso.id,itemfelso,itemalso.id,itemalso)
+
+        setTimeout(() => { this.setState({todos:Array().fill(''),init:false})},500)
     }
-    updataline(i){
-        let datalinesnew=this.state.datalines
-        let datasnew=this.state.datas
-        let idsnew=this.state.ids
-        let buffer=datalinesnew[i-1]
-        let buffer2=datasnew[i-1]
-        let buffer3=idsnew[i-1]
-        if(i===0)
+
+    downdataline(k){
+        let i=0
+        const uri = '/api/todoitems';
+        fetch(uri)
+            .then(response => response.json())
+            .then(data => this.toMoveDOWN(data,k))
+            .catch(error => console.error('Unable to get items.', error));
+    }
+
+    toMoveDOWN(data,k){
+        let dx
+        let datalist=[]
+        for(let d=0;d<data.length;d++){
+            if(data[d].columnID===this.state.id){
+                datalist.push(data[d])
+            }
+        }
+        for(let i=0;i<datalist.length;i++){
+            if(datalist[i].id===k){
+                dx=i
+            }
+        }
+        if(dx===datalist.length)
             return
-        datalinesnew[i-1]=datalinesnew[i]
-        datalinesnew[i]=buffer
-        datasnew[i-1]=datasnew[i]
-        datasnew[i]=buffer2
 
-
-        const item={
-            id:idsnew[i-1],
+        const itemfelso={
+            id:datalist[dx].id,
             columnID:this.state.id,
-            name:datalinesnew[i-1],
-            description:datasnew[i-1],
-            position:1,
-            column:null
+            name:datalist[dx+1].name,
+            description:datalist[dx+1].description,
+         //   position:1,
+         //   column:null
         }
 
-        const item2={
-            id:idsnew[i],
+        const itemalso={
+            id:datalist[dx+1].id,
             columnID:this.state.id,
-            name:datalinesnew[i],
-            description:datasnew[i],
-            position:1,
-            column:null
+            name:datalist[dx].name,
+            description:datalist[dx].description,
+          //  position:1,
+          //  column:null
         }
-        this.fetchback(idsnew[i],item2,idsnew[i-1],item)
-        this.setState({
-            datalines:datalinesnew,
-            datas:datasnew,
-            ids:idsnew
-        })
+        this.fetchback(itemfelso.id,itemfelso,itemalso.id,itemalso)
+
+        setTimeout(() => { this.setState({todos:Array().fill(''),init:false})},500)
     }
-    downdataline(i){
-        let datalinesnew=this.state.datalines
-        let datasnew=this.state.datas
-        let idsnew=this.state.ids
-        let buffer=datalinesnew[i+1]
-        let buffer2=datasnew[i+1]
-        if(i===6 || this.state.count<=i+1 || datalinesnew[i-1]===null)
-            return
-        datalinesnew[i+1]=datalinesnew[i]
-        datalinesnew[i]=buffer
-        datasnew[i+1]=datasnew[i]
-        datasnew[i]=buffer2
-        const item={
-            id:idsnew[i+1],
-            columnID:this.state.id,
-            name:datalinesnew[i+1],
-            description:datasnew[i+1],
-            position:1,
-            column:null
-        }
 
-        const item2={
-            id:idsnew[i],
+    //direction 0 downdata, 1 updata
+    /*
+    toMove(data,k,direction){
+        let dx
+        let datalist=[]
+        for(let d=0;d<data.length;d++){
+            datalist.push(data[d])
+        }
+        for(let i=0;i<datalist.length;i++){
+            if(datalist[i].id===k){
+                dx=i
+            }
+        }
+        const itemfelso={
+            id:datalist[dx].id,
             columnID:this.state.id,
-            name:datalinesnew[i],
-            description:datasnew[i],
+            name:datalist[dx-1].name,
+            description:datalist[dx-1].description,
             position:1,
             column:null
         }
-        this.fetchback(idsnew[i],item2,idsnew[i+1],item)
-        this.setState({
-            datalines:datalinesnew,
-            datas:datasnew,
-            ids:idsnew
-        })
+        const itemfofel={
+            id:datalist[dx-1].id,
+            columnID:this.state.id,
+            name:datalist[dx].name,
+            description:datalist[dx].description,
+            position:1,
+            column:null
+        }
+        const itemfo={
+            id:datalist[dx+1].id,
+            columnID:this.state.id,
+            name:datalist[dx].name,
+            description:datalist[dx].description,
+            position:1,
+            column:null
+        }
+        const itemalso={
+            id:datalist[dx].id,
+            columnID:this.state.id,
+            name:datalist[dx+1].name,
+            description:datalist[dx+1].description,
+            position:1,
+            column:null
+        }
+        if(direction==2){
+            this.fetchback(itemfo.id,itemfo,itemalso.id,itemalso)
+        }
+        if(direction==1){
+            this.fetchback(itemfofel.id,itemfofel,itemfelso.id,itemfelso)
+        }
+        this.setState({todos:Array().fill(''),init:false})
     }
+    */
 
     fetchback(i,item,i2,item2){
         fetch("/api/todoitems/"+i, {
@@ -519,48 +488,13 @@ class ProjectBox extends React.Component {
 
 
     renderdatalines(){
-        let datalinesrender=[]
-        for(let i=0; i<this.state.count; i++){
-            let open=this.state.opens[i]
-            datalinesrender.push(
-                <div className="margin">
-                    <Card sx={{maxWidth:300}}>
-                        <CardContent>
-                            <Typography>
-                                Név:{this.state.datalines[i]}
-                            </Typography>
-                            <Typography>
-                                Leírás:{this.state.datas[i]}
-                            </Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button startIcon={<ArrowUpwardIcon/>} onClick={()=>this.updataline(i)}/>
-                            <Button startIcon={<ArrowDownwardIcon/>} onClick={()=>this.downdataline(i)} />
-                            <Button startIcon={<DeleteIcon/>} onClick={() => this.emptydataline(i)}/>
-                            <Button sx={{width:300}} startIcon={<AddCircleIcon/>} onClick={()=>this.handleClickOpenmodify(i)}/>
-                            <Dialog open={open} alignItems="center">
-                                <DialogTitle>Modify a Task</DialogTitle>
-                                <DialogContentText >To modify a Task please edit the fields below</DialogContentText>
-                                <DialogContent>
-                                    <form onSubmit={this.handleSubmitmodify}>
-                                        <label>
-                                            Task:
-                                            <TextField type="text" value={this.state.valuemodify} onChange={(e)=>this.setState({valuemodify: e.target.value})} />
-                                            Description:
-                                            <TextField type="text" value={this.state.value2modify} onChange={(e)=>this.setState({value2modify: e.target.value})} />
-                                        </label>
-                                        <div> <Button onClick={()=>this.handleClosemodify(i)}>Cancel</Button>
-                                            <Button type="submit" variant="text" value="Submit">Modify</Button>
-                                        </div>
-                                    </form>
-                                </DialogContent>
-                            </Dialog>
-                        </CardActions>
-                    </Card>
-                </div>
-            )
+        let renderlines=[]
+        if(this.state.init===false)
+            return
+        for(let k=0;k<10;k++){
+            renderlines.push(this.state.todos[k])
         }
-        return datalinesrender
+        return renderlines
     }
     render() {
 
@@ -598,14 +532,14 @@ class Main extends React.Component {
             projectArray:Array(3).fill(''),
             maxprojectsnumber:10,
             init:false,
-            maxid:0
+            maxid:0,
         }
     }
 
     fetchcolumn(i){
         const item={
             ID:i,
-            TodoItems:null,
+           // TodoItems:null,
         }
         fetch('api/columns', {
             method: 'POST',
@@ -620,36 +554,40 @@ class Main extends React.Component {
     }
 
     addProject(dx){
+        let idx=this.state.maxid+1
         let projects= []
         for(let j=0;j<this.state.numberOfprojects;j++){
             projects.push(this.state.projectArray[j])
         }
         projects.push(
             <Grid item xs={12} md={3}>
-                    <ProjectBox value={(dx+1)} />
+                    <ProjectBox value={(idx)} />
             </Grid>
 
             )
-        this.fetchcolumn(dx+1)
+        this.fetchcolumn(idx)
         this.setState({
             projectArray:projects,
-            numberOfprojects:this.state.numberOfprojects+1
+            numberOfprojects:this.state.numberOfprojects+1,
+            maxid:idx
         })
     }
     addProjectwithoutfetch(dx){
+        let max=this.state.max
         let projects= []
         for(let j=0;j<this.state.numberOfprojects;j++){
             projects.push(this.state.projectArray[j])
         }
         projects.push(
             <Grid item xs={12} md={3}>
-                <ProjectBox value={(dx+1)} />
+                <ProjectBox value={(dx)} />
             </Grid>
 
         )
         this.setState({
             projectArray:projects,
-            numberOfprojects:this.state.numberOfprojects+1
+            numberOfprojects:this.state.numberOfprojects+1,
+            maxid:dx
         })
     }
     clearProjects(){
@@ -661,7 +599,7 @@ class Main extends React.Component {
 
     addlist(data){
             for (var k = 0; k < data.length; k++) {
-                this.addProjectwithoutfetch(k);
+                this.addProjectwithoutfetch(data[k].id);
             }
     }
     initcolumns(){
@@ -681,12 +619,12 @@ class Main extends React.Component {
             dx=data[k].id
         }
         this.setState({
-            maxid:dx,
+            maxidtodo:dx,
         })
         for(let l=1;l<=dx;l++){
             this.deletetodo(l)
         }
-        for(let h=1;h<=this.state.numberOfprojects;h++){
+        for(let h=1;h<=this.state.maxid;h++){
             this.deletecolumns(h)
         }
         this.setState({numberOfprojects:0})
@@ -721,7 +659,7 @@ class Main extends React.Component {
                         {this.initcolumns()}
                         {this.state.projectArray}
                         <Grid item xs={12} md={3}>
-                            <Button variant="text" onClick={()=>this.addProject(this.state.numberOfprojects)}> Add Project</Button>
+                            <Button variant="text" onClick={()=>this.addProject(this.state.max)}> Add Project</Button>
                             <Button variant="text" onClick={()=>this.clearProjects()}> Clear Projects</Button>
                         </Grid>
                     </Grid>
@@ -744,3 +682,4 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
